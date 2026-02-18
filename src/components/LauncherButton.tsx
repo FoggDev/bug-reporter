@@ -13,9 +13,7 @@ export function LauncherButton() {
   }
 
   const positionClass = config.theme.position === "bottom-left" ? "is-left" : "is-right";
-  const hasActiveDraft = Boolean(
-    draft.title || draft.description || draft.stepsToReproduce || draft.expectedBehavior || draft.actualBehavior || assets.length
-  );
+  const hasActiveDraft = Boolean(draft.title || draft.description || assets.length);
 
   return (
     <button
@@ -29,7 +27,7 @@ export function LauncherButton() {
       onClick={open}
       aria-label="Open bug reporter"
     >
-      {hasActiveDraft ? "Resume report" : "Report bug"}
+      {hasActiveDraft ? "Resume report" : "Get Help"}
     </button>
   );
 }

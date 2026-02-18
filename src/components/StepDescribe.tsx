@@ -36,32 +36,6 @@ export function StepDescribe({ onNext }: StepDescribeProps) {
         />
       </label>
 
-      <label className="br-field">
-        Steps to reproduce
-        <textarea
-          value={draft.stepsToReproduce}
-          onChange={(event) => updateDraft({ stepsToReproduce: event.target.value })}
-          placeholder="One step per line"
-          rows={4}
-        />
-      </label>
-
-      <div className="br-grid-2">
-        <label className="br-field">
-          Expected behavior
-          <textarea
-            value={draft.expectedBehavior}
-            onChange={(event) => updateDraft({ expectedBehavior: event.target.value })}
-            rows={3}
-          />
-        </label>
-
-        <label className="br-field">
-          Actual behavior
-          <textarea value={draft.actualBehavior} onChange={(event) => updateDraft({ actualBehavior: event.target.value })} rows={3} />
-        </label>
-      </div>
-
       <div className="br-actions">
         <button type="button" className="br-btn br-btn-primary" disabled={!draft.title.trim()} onClick={onNext}>
           Continue

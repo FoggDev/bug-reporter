@@ -33,7 +33,6 @@ export function StepRecording({ onBack, onNext }: StepRecordingProps) {
   const recording = useMemo(() => assets.find((asset) => asset.type === "recording"), [assets]);
   const activeRef = useRef<ActiveRecording | null>(null);
   const mountedRef = useRef(true);
-  const [hasConsent, setHasConsent] = useState(false);
   const [isRecording, setIsRecording] = useState(Boolean(sharedRecording));
   const [seconds, setSeconds] = useState(sharedRecording?.seconds ?? 0);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +40,6 @@ export function StepRecording({ onBack, onNext }: StepRecordingProps) {
   const start = async () => {
     if (sharedRecording) {
       setError("Recording is already in progress.");
-      return;
-    }
-
-    if (!hasConsent) {
-      setError("Consent is required before recording.");
       return;
     }
 
@@ -125,11 +119,6 @@ export function StepRecording({ onBack, onNext }: StepRecordingProps) {
     <div className="br-step">
       <h2>Screen recording</h2>
       <p>Record up to {config.storage.limits.maxVideoSeconds} seconds. You can minimize this sidebar while recording.</p>
-
-      <label className="br-checkbox">
-        <input type="checkbox" checked={hasConsent} onChange={(event) => setHasConsent(event.target.checked)} />
-        I consent to share my screen recording for debugging.
-      </label>
 
       <div className="br-actions">
         <button type="button" className="br-btn br-btn-secondary" onClick={onBack} disabled={isRecording}>

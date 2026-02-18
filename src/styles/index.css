@@ -66,13 +66,26 @@
 }
 
 .br-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--br-border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--br-text);
   width: 30px;
   height: 30px;
+  padding: 0;
   cursor: pointer;
+}
+
+.br-icon-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
 }
 
 .br-step {

@@ -51,8 +51,10 @@ function BugReporterShell() {
       <Modal isOpen={state.isOpen} title={modalTitle} zIndex={config.theme.zIndex + 1} onRequestClose={requestClose}>
         <div className="br-modal-header">
           <strong>{modalTitle}</strong>
-          <button className="br-icon-btn" type="button" onClick={requestClose} aria-label="Minimize bug reporter">
-            -
+          <button className="br-icon-btn" type="button" onClick={requestClose} aria-label="Close bug reporter">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 6 18 18M18 6 6 18" />
+            </svg>
           </button>
         </div>
 
