@@ -35,9 +35,29 @@
   inset: 0;
   background: var(--br-overlay);
   display: flex;
+  pointer-events: none;
+}
+
+.br-modal-overlay.is-right {
   align-items: stretch;
   justify-content: flex-end;
-  pointer-events: none;
+}
+
+.br-modal-overlay.is-left {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.br-modal-overlay.is-top {
+  align-items: flex-start;
+  justify-content: stretch;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.1) 45%, transparent 72%);
+}
+
+.br-modal-overlay.is-bottom {
+  align-items: flex-end;
+  justify-content: stretch;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.1) 45%, transparent 72%);
 }
 
 .br-modal {
@@ -47,10 +67,35 @@
   overflow: auto;
   background: var(--br-bg);
   color: var(--br-text);
-  border-left: 1px solid var(--br-border);
   box-shadow: var(--br-shadow);
   font-family: var(--br-font);
   backdrop-filter: blur(8px);
+}
+
+.br-modal.is-right {
+  border-left: 1px solid var(--br-border);
+}
+
+.br-modal.is-left {
+  border-right: 1px solid var(--br-border);
+  box-shadow: 14px 0 40px rgba(0, 0, 0, 0.42);
+}
+
+.br-modal.is-top,
+.br-modal.is-bottom {
+  width: 100vw;
+  max-height: 100vh;
+  height: min(460px, 100vh);
+}
+
+.br-modal.is-top {
+  border-bottom: 1px solid var(--br-border);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
+}
+
+.br-modal.is-bottom {
+  border-top: 1px solid var(--br-border);
+  box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.42);
 }
 
 .br-modal-header {
@@ -63,6 +108,17 @@
   padding: 14px 16px;
   border-bottom: 1px solid var(--br-border);
   background: rgba(5, 8, 12, 0.72);
+}
+
+.br-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.br-dock-controls {
+  display: flex;
+  gap: 6px;
 }
 
 .br-icon-btn {
@@ -86,6 +142,18 @@
   stroke: currentColor;
   stroke-width: 1.8;
   stroke-linecap: round;
+}
+
+.br-dock-btn svg path:last-child {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.85;
+}
+
+.br-dock-btn.is-active {
+  border-color: var(--br-primary);
+  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .br-step {
@@ -307,6 +375,10 @@
 
   .br-modal {
     width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border: 0;
+    box-shadow: none;
   }
 
   .br-launcher {

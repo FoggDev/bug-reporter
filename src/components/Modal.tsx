@@ -3,16 +3,18 @@ import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useFocusTrap } from "../hooks";
+import type { DockSide } from "../types";
 
 type ModalProps = {
   isOpen: boolean;
+  dockSide: DockSide;
   title: string;
   zIndex: number;
   onRequestClose: () => void;
   children: ReactNode;
 };
 
-export function Modal({ isOpen, title, zIndex, onRequestClose, children }: ModalProps) {
+export function Modal({ isOpen, dockSide, title, zIndex, onRequestClose, children }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useFocusTrap(isOpen, dialogRef);
 
@@ -37,8 +39,8 @@ export function Modal({ isOpen, title, zIndex, onRequestClose, children }: Modal
   }
 
   return createPortal(
-    <div className="br-modal-overlay" style={{ zIndex }}>
-      <div ref={dialogRef} className="br-modal" role="dialog" aria-modal="true" aria-label={title}>
+    <div className={`br-modal-overlay is-${dockSide}`} style={{ zIndex }}>
+      <div ref={dialogRef} className={`br-modal is-${dockSide}`} role="dialog" aria-modal="true" aria-label={title}>
         {children}
       </div>
     </div>,

@@ -13,6 +13,7 @@ export type {
   BugReporterState,
   CapturedAsset,
   CustomFormProps,
+  DockSide,
   DiagnosticsSnapshot,
   FeatureFlags,
   StorageMode,

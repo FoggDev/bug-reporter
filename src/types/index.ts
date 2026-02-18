@@ -5,6 +5,7 @@ export type StorageMode = "s3-presigned" | "local-public" | "proxy";
 export type ReportEnvironment = "development" | "staging" | "production";
 export type AssetType = "screenshot" | "recording" | "attachment";
 export type FlowStep = "describe" | "screenshot" | "recording" | "review" | "submitting" | "success";
+export type DockSide = "left" | "right" | "top" | "bottom";
 
 export type FeatureFlags = {
   screenshot?: boolean;
@@ -266,6 +267,7 @@ export type BugReporterConfig = {
 
 export type BugReporterState = {
   isOpen: boolean;
+  dockSide: DockSide;
   step: FlowStep;
   draft: ReportDraft;
   attributes: Record<string, unknown>;
@@ -282,6 +284,7 @@ export type BugReporterContextValue = {
   open: () => void;
   close: () => void;
   reset: () => void;
+  setDockSide: (dockSide: DockSide) => void;
   setStep: (step: FlowStep) => void;
   updateDraft: (next: Partial<ReportDraft>) => void;
   setAttributes: (next: Record<string, unknown>) => void;

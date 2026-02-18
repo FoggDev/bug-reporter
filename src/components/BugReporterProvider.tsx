@@ -17,6 +17,7 @@ import type {
   BugReporterContextValue,
   BugReporterState,
   CapturedAsset,
+  DockSide,
   DiagnosticsPreview,
   FlowStep,
   ReportDraft
@@ -36,6 +37,7 @@ const EMPTY_DRAFT: ReportDraft = {
 
 const BASE_STATE: BugReporterState = {
   isOpen: false,
+  dockSide: "right",
   step: "describe",
   draft: EMPTY_DRAFT,
   attributes: {},
@@ -47,8 +49,10 @@ const BASE_STATE: BugReporterState = {
 
 export function BugReporterProvider({ config, children }: BugReporterProviderProps) {
   const resolvedConfig = useMemo(() => withDefaults(config), [config]);
+  const initialDockSide: DockSide = resolvedConfig.theme.position === "bottom-left" ? "left" : "right";
   const [state, setState] = useState<BugReporterState>(() => ({
     ...BASE_STATE,
+    dockSide: initialDockSide,
     attributes: { ...resolvedConfig.attributes }
   }));
   const [sessionActive, setSessionActive] = useState(false);
@@ -82,6 +86,7 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       resetAssets(prev.assets);
       return {
         ...BASE_STATE,
+        dockSide: prev.dockSide,
         attributes: { ...resolvedConfig.attributes },
         isOpen: prev.isOpen
       };
@@ -93,6 +98,10 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
 
   const setStep = useCallback((step: FlowStep) => {
     setState((prev) => ({ ...prev, step }));
+  }, []);
+
+  const setDockSide = useCallback((dockSide: DockSide) => {
+    setState((prev) => ({ ...prev, dockSide }));
   }, []);
 
   const updateDraft = useCallback((next: Partial<ReportDraft>) => {
@@ -261,6 +270,7 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       open,
       close,
       reset,
+      setDockSide,
       setStep,
       updateDraft,
       setAttributes,
@@ -277,6 +287,7 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       open,
       close,
       reset,
+      setDockSide,
       setStep,
       updateDraft,
       setAttributes,
