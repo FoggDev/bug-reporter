@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+
 export type StorageMode = "s3-presigned" | "local-public" | "proxy";
 
 export type ReportEnvironment = "development" | "staging" | "production";
@@ -81,6 +83,15 @@ export type DiagnosticsSnapshot = {
   browser: string;
   os: string;
   language: string;
+  userAgent: string;
+  userAgentData?: {
+    brands?: Array<{
+      brand: string;
+      version: string;
+    }>;
+    mobile?: boolean;
+    platform?: string;
+  };
   appVersion?: string;
   environment?: ReportEnvironment;
   projectId?: string;
@@ -123,22 +134,57 @@ export type ReportDraft = {
   actualBehavior: string;
 };
 
+export type Reporter = {
+  id?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  ip?: string;
+  anonymous: boolean;
+};
+
+export type CustomFormProps = {
+  attributes: Record<string, unknown>;
+  setAttributes: (next: Record<string, unknown>) => void;
+  updateAttribute: (key: string, value: unknown) => void;
+};
+
+export type CustomFormComponent = ComponentType<CustomFormProps>;
+
 export type BugReportPayload = {
-  title: string;
-  description: string;
-  steps: string[];
-  expectedBehavior: string;
-  actualBehavior: string;
-  diagnostics: DiagnosticsSnapshot;
-  assets: AssetReference[];
-  projectId?: string;
-  appVersion?: string;
-  environment?: ReportEnvironment;
-  user?: {
-    id?: string;
-    email?: string;
-    name?: string;
+  issue: {
+    title: string;
+    description: string;
+    projectId?: string;
+    environment?: ReportEnvironment;
+    appVersion?: string;
+    assets: AssetReference[];
   };
+  context: {
+    url: string;
+    referrer: string;
+    timestamp: string;
+    timezone: string;
+    viewport: {
+      width: number;
+      height: number;
+      pixelRatio: number;
+    };
+    client: {
+      browser: string;
+      os: string;
+      language: string;
+      userAgent: string;
+    };
+    userAgentData?: DiagnosticsSnapshot["userAgentData"];
+    performance: {
+      navigationTiming?: DiagnosticsSnapshot["navigationTiming"];
+    };
+    logs?: ConsoleLogEntry[];
+    requests?: NetworkRequestEntry[];
+  };
+  reporter: Reporter;
+  attributes: Record<string, unknown>;
 };
 
 export type BugReportResponse = {
@@ -198,7 +244,11 @@ export type BugReporterConfig = {
     id?: string;
     email?: string;
     name?: string;
+    role?: string;
+    ip?: string;
+    anonymous?: boolean;
   };
+  attributes?: Record<string, unknown>;
   privacy?: {
     maskSelectors?: string[];
     redactTextPatterns?: Array<string | RegExp>;
@@ -218,6 +268,7 @@ export type BugReporterState = {
   isOpen: boolean;
   step: FlowStep;
   draft: ReportDraft;
+  attributes: Record<string, unknown>;
   assets: CapturedAsset[];
   diagnostics?: DiagnosticsSnapshot;
   uploadProgress: number;
@@ -233,6 +284,8 @@ export type BugReporterContextValue = {
   reset: () => void;
   setStep: (step: FlowStep) => void;
   updateDraft: (next: Partial<ReportDraft>) => void;
+  setAttributes: (next: Record<string, unknown>) => void;
+  updateAttribute: (key: string, value: unknown) => void;
   setScreenshot: (asset?: CapturedAsset) => void;
   setRecording: (asset?: CapturedAsset) => void;
   submit: () => Promise<void>;
@@ -270,7 +323,11 @@ export type RequiredBugReporterConfig = {
     id?: string;
     email?: string;
     name?: string;
+    role?: string;
+    ip?: string;
+    anonymous?: boolean;
   };
+  attributes: Record<string, unknown>;
   privacy: {
     maskSelectors: string[];
     redactTextPatterns: Array<string | RegExp>;

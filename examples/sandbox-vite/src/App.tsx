@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BugReporter } from "bug-reporter";
+import type { CustomFormProps } from "bug-reporter";
 import "bug-reporter/styles.css";
 
 declare global {
@@ -69,6 +70,25 @@ if (!window.__bugReporterSandboxFetchMocked) {
     return originalFetch(input, init);
   };
   window.__bugReporterSandboxFetchMocked = true;
+}
+
+function SeverityCustomForm({ attributes, updateAttribute }: CustomFormProps) {
+  const severityLevel = typeof attributes.severityLevel === "string" ? attributes.severityLevel : "";
+
+  return (
+    <label className="br-field">
+      What is the severity level?
+      <select value={severityLevel} onChange={(event) => updateAttribute("severityLevel", event.target.value)}>
+        <option value="" disabled>
+          Select severity level
+        </option>
+        <option value="preventing_release_campaign">Is preventing to release a Campaign</option>
+        <option value="campaign_already_live">My campaign is already live</option>
+        <option value="campaign_live_in_few_hours">The campaign will be live in a few hours</option>
+        <option value="campaign_live_later_today">The campaign will be live later today</option>
+      </select>
+    </label>
+  );
 }
 
 export function App() {
@@ -146,6 +166,7 @@ export function App() {
       </main>
 
       <BugReporter
+        CustomForm={SeverityCustomForm}
         config={{
           apiEndpoint: "/sandbox/report",
           projectId: "sandbox-vite",

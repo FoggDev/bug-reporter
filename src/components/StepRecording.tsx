@@ -7,8 +7,9 @@ import { validateVideoSize } from "../core/validation";
 import { useBugReporter } from "../hooks";
 
 type StepRecordingProps = {
-  onBack: () => void;
-  onNext: () => void;
+  onBack?: () => void;
+  onNext?: () => void;
+  embedded?: boolean;
 };
 
 type SharedRecordingState = {
@@ -23,7 +24,7 @@ function notifySubscribers(): void {
   subscribers.forEach((handler) => handler());
 }
 
-export function StepRecording({ onBack, onNext }: StepRecordingProps) {
+export function StepRecording({ onBack, onNext, embedded = false }: StepRecordingProps) {
   const {
     config,
     state: { assets },
@@ -116,14 +117,16 @@ export function StepRecording({ onBack, onNext }: StepRecordingProps) {
   }, []);
 
   return (
-    <div className="br-step">
-      <h2>Screen recording</h2>
+    <div className={embedded ? undefined : "br-step"}>
+      {embedded ? <h3>Screen recording</h3> : <h2>Screen recording</h2>}
       <p>Record up to {config.storage.limits.maxVideoSeconds} seconds. You can minimize this sidebar while recording.</p>
 
       <div className="br-actions">
-        <button type="button" className="br-btn br-btn-secondary" onClick={onBack} disabled={isRecording}>
-          Back
-        </button>
+        {onBack ? (
+          <button type="button" className="br-btn br-btn-secondary" onClick={onBack} disabled={isRecording}>
+            Back
+          </button>
+        ) : null}
         {!isRecording ? (
           <button type="button" className="br-btn br-btn-primary" onClick={start}>
             {recording ? "Retake recording" : "Start recording"}
@@ -138,11 +141,13 @@ export function StepRecording({ onBack, onNext }: StepRecordingProps) {
       {recording ? <video src={recording.previewUrl} className="br-preview" controls /> : null}
       {error ? <p className="br-error">{error}</p> : null}
 
-      <div className="br-actions">
-        <button type="button" className="br-btn br-btn-primary" onClick={onNext}>
-          Continue
-        </button>
-      </div>
+      {onNext ? (
+        <div className="br-actions">
+          <button type="button" className="br-btn br-btn-primary" onClick={onNext}>
+            Continue
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

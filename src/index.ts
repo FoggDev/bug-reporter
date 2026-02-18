@@ -12,6 +12,7 @@ export type {
   BugReporterContextValue,
   BugReporterState,
   CapturedAsset,
+  CustomFormProps,
   DiagnosticsSnapshot,
   FeatureFlags,
   StorageMode,

@@ -111,7 +111,8 @@
 }
 
 .br-field input,
-.br-field textarea {
+.br-field textarea,
+.br-field select {
   border: 1px solid var(--br-border);
   border-radius: 10px;
   font: 400 14px var(--br-font);

@@ -40,6 +40,7 @@ export function withDefaults(config: BugReporterConfig): RequiredBugReporterConf
       networkInfo: config.features?.networkInfo ?? false
     },
     user: config.user,
+    attributes: config.attributes ?? {},
     privacy: {
       maskSelectors: config.privacy?.maskSelectors ?? DEFAULT_MASK_SELECTORS,
       redactTextPatterns: config.privacy?.redactTextPatterns ?? []

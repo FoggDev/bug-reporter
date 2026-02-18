@@ -6,6 +6,33 @@ type CollectDiagnosticsOptions = {
   requests?: DiagnosticsSnapshot["requests"];
 };
 
+type NavigatorWithUserAgentData = Navigator & {
+  userAgentData?: {
+    brands?: ReadonlyArray<{
+      brand: string;
+      version: string;
+    }>;
+    mobile?: boolean;
+    platform?: string;
+  };
+};
+
+function getUserAgentDataSnapshot(): DiagnosticsSnapshot["userAgentData"] | undefined {
+  const userAgentData = (navigator as NavigatorWithUserAgentData).userAgentData;
+  if (!userAgentData) {
+    return undefined;
+  }
+
+  return {
+    brands: userAgentData.brands?.map((item) => ({
+      brand: item.brand,
+      version: item.version
+    })),
+    mobile: userAgentData.mobile,
+    platform: userAgentData.platform
+  };
+}
+
 export function collectDiagnostics(
   config: RequiredBugReporterConfig,
   options?: CollectDiagnosticsOptions
@@ -26,6 +53,8 @@ export function collectDiagnostics(
     browser,
     os,
     language: navigator.language,
+    userAgent: navigator.userAgent,
+    userAgentData: getUserAgentDataSnapshot(),
     appVersion: config.appVersion,
     environment: config.environment,
     projectId: config.projectId,

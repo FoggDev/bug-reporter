@@ -9,11 +9,11 @@ import type {
 } from "../types";
 import { createStorageProvider } from "../storage";
 import { uploadAssets } from "./upload";
-import { splitSteps } from "./utils";
 
 type SubmitReportOptions = {
   config: RequiredBugReporterConfig;
   draft: ReportDraft;
+  attributes: Record<string, unknown>;
   diagnostics: DiagnosticsSnapshot;
   assets: CapturedAsset[];
   onUploadProgress?: (progress: number) => void;
@@ -29,17 +29,42 @@ export async function submitReport(options: SubmitReportOptions): Promise<BugRep
   });
 
   const payloadBase: BugReportPayload = {
-    title: options.draft.title,
-    description: options.draft.description,
-    steps: splitSteps(options.draft.stepsToReproduce),
-    expectedBehavior: options.draft.expectedBehavior,
-    actualBehavior: options.draft.actualBehavior,
-    diagnostics: options.diagnostics,
-    assets: assetReferences,
-    projectId: options.config.projectId,
-    appVersion: options.config.appVersion,
-    environment: options.config.environment,
-    user: options.config.user
+    issue: {
+      title: options.draft.title,
+      description: options.draft.description,
+      projectId: options.config.projectId,
+      environment: options.config.environment,
+      appVersion: options.config.appVersion,
+      assets: assetReferences
+    },
+    context: {
+      url: options.diagnostics.url,
+      referrer: options.diagnostics.referrer,
+      timestamp: options.diagnostics.timestamp,
+      timezone: options.diagnostics.timezone,
+      viewport: options.diagnostics.viewport,
+      client: {
+        browser: options.diagnostics.browser,
+        os: options.diagnostics.os,
+        language: options.diagnostics.language,
+        userAgent: options.diagnostics.userAgent
+      },
+      userAgentData: options.diagnostics.userAgentData,
+      performance: {
+        navigationTiming: options.diagnostics.navigationTiming
+      },
+      logs: options.diagnostics.logs,
+      requests: options.diagnostics.requests
+    },
+    reporter: {
+      id: options.config.user?.id,
+      name: options.config.user?.name,
+      email: options.config.user?.email,
+      role: options.config.user?.role,
+      ip: options.config.user?.ip,
+      anonymous: options.config.user?.anonymous ?? !(options.config.user?.id || options.config.user?.email || options.config.user?.name)
+    },
+    attributes: options.attributes
   };
 
   const transformed = options.config.hooks.beforeSubmit ? await options.config.hooks.beforeSubmit(payloadBase) : payloadBase;

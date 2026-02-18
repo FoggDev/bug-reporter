@@ -3,36 +3,23 @@ import { BugReporterProvider } from "./BugReporterProvider";
 import { LauncherButton } from "./LauncherButton";
 import { Modal } from "./Modal";
 import { StepDescribe } from "./StepDescribe";
-import { StepRecording } from "./StepRecording";
 import { StepReview } from "./StepReview";
-import { StepScreenshot } from "./StepScreenshot";
 import { useBugReporter } from "../hooks";
-import type { BugReporterConfig } from "../types";
+import type { BugReporterConfig, CustomFormComponent } from "../types";
 
 type BugReporterProps = {
   config: BugReporterConfig;
+  CustomForm?: CustomFormComponent;
 };
 
-function BugReporterShell() {
+type BugReporterShellProps = {
+  CustomForm?: CustomFormComponent;
+};
+
+function BugReporterShell({ CustomForm }: BugReporterShellProps) {
   const { config, state, setStep, close, reset } = useBugReporter();
 
   const nextFromDescribe = () => {
-    if (config.features.screenshot) {
-      setStep("screenshot");
-      return;
-    }
-    if (config.features.recording) {
-      setStep("recording");
-      return;
-    }
-    setStep("review");
-  };
-
-  const nextFromScreenshot = () => {
-    if (config.features.recording) {
-      setStep("recording");
-      return;
-    }
     setStep("review");
   };
 
@@ -58,25 +45,10 @@ function BugReporterShell() {
           </button>
         </div>
 
-        {state.step === "describe" ? <StepDescribe onNext={nextFromDescribe} /> : null}
-        {state.step === "screenshot" ? <StepScreenshot onBack={() => setStep("describe")} onNext={nextFromScreenshot} /> : null}
-        {state.step === "recording" ? (
-          <StepRecording
-            onBack={() => setStep(config.features.screenshot ? "screenshot" : "describe")}
-            onNext={() => setStep("review")}
-          />
-        ) : null}
+        {state.step === "describe" ? <StepDescribe onNext={nextFromDescribe} CustomForm={CustomForm} /> : null}
         {state.step === "review" || state.step === "submitting" ? (
           <StepReview
             onBack={() => {
-              if (config.features.recording) {
-                setStep("recording");
-                return;
-              }
-              if (config.features.screenshot) {
-                setStep("screenshot");
-                return;
-              }
               setStep("describe");
             }}
           />
@@ -98,10 +70,10 @@ function BugReporterShell() {
   );
 }
 
-export function BugReporter({ config }: BugReporterProps) {
+export function BugReporter({ config, CustomForm }: BugReporterProps) {
   return (
     <BugReporterProvider config={config}>
-      <BugReporterShell />
+      <BugReporterShell CustomForm={CustomForm} />
     </BugReporterProvider>
   );
 }

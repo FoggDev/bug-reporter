@@ -38,6 +38,7 @@ const BASE_STATE: BugReporterState = {
   isOpen: false,
   step: "describe",
   draft: EMPTY_DRAFT,
+  attributes: {},
   assets: [],
   uploadProgress: 0,
   isSubmitting: false,
@@ -46,7 +47,10 @@ const BASE_STATE: BugReporterState = {
 
 export function BugReporterProvider({ config, children }: BugReporterProviderProps) {
   const resolvedConfig = useMemo(() => withDefaults(config), [config]);
-  const [state, setState] = useState<BugReporterState>(BASE_STATE);
+  const [state, setState] = useState<BugReporterState>(() => ({
+    ...BASE_STATE,
+    attributes: { ...resolvedConfig.attributes }
+  }));
   const [sessionActive, setSessionActive] = useState(false);
   const consoleBufferRef = useRef<ConsoleBuffer | null>(null);
   const networkBufferRef = useRef<NetworkBuffer | null>(null);
@@ -78,13 +82,14 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       resetAssets(prev.assets);
       return {
         ...BASE_STATE,
+        attributes: { ...resolvedConfig.attributes },
         isOpen: prev.isOpen
       };
     });
 
     consoleBufferRef.current?.clear();
     networkBufferRef.current?.clear();
-  }, [resetAssets]);
+  }, [resetAssets, resolvedConfig.attributes]);
 
   const setStep = useCallback((step: FlowStep) => {
     setState((prev) => ({ ...prev, step }));
@@ -96,6 +101,23 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       draft: {
         ...prev.draft,
         ...next
+      }
+    }));
+  }, []);
+
+  const setAttributes = useCallback((next: Record<string, unknown>) => {
+    setState((prev) => ({
+      ...prev,
+      attributes: next
+    }));
+  }, []);
+
+  const updateAttribute = useCallback((key: string, value: unknown) => {
+    setState((prev) => ({
+      ...prev,
+      attributes: {
+        ...prev.attributes,
+        [key]: value
       }
     }));
   }, []);
@@ -143,6 +165,7 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       const response = await submitReport({
         config: resolvedConfig,
         draft: state.draft,
+        attributes: state.attributes,
         diagnostics,
         assets: state.assets,
         onUploadProgress: (progress) => {
@@ -169,7 +192,7 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       }));
       resolvedConfig.hooks.onError?.(error as any);
     }
-  }, [resolvedConfig, state.assets, state.draft]);
+  }, [resolvedConfig, state.assets, state.attributes, state.draft]);
 
   const retrySubmit = useCallback(async () => {
     await submit();
@@ -240,6 +263,8 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       reset,
       setStep,
       updateDraft,
+      setAttributes,
+      updateAttribute,
       setScreenshot,
       setRecording,
       submit,
@@ -254,6 +279,8 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
       reset,
       setStep,
       updateDraft,
+      setAttributes,
+      updateAttribute,
       setScreenshot,
       setRecording,
       submit,
