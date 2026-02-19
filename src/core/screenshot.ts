@@ -1,4 +1,5 @@
 import { BugReporterError } from "../types";
+import html2canvas from "html2canvas";
 
 type CaptureOptions = {
   maskSelectors: string[];
@@ -162,7 +163,6 @@ export async function captureScreenshotArea(options: CaptureOptions): Promise<Bl
   const textChanges = scrubText(document.body, options.redactTextPatterns);
 
   try {
-    const { default: html2canvas } = await import("html2canvas");
     const baseCanvas = await html2canvas(document.documentElement, {
       useCORS: true,
       scrollX: -window.scrollX,
