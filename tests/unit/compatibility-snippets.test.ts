@@ -22,7 +22,7 @@ describe("framework compatibility snippets", () => {
   it("transpiles Next.js App Router usage", () => {
     const output = transpile(`
       "use client";
-      import { BugReporter } from "bug-reporter";
+      import { BugReporter } from "@fogg/bug-reporter";
       export function Reporter() {
         return <BugReporter config={{ apiEndpoint: "/api/report", storage: { mode: "proxy", proxy: { uploadEndpoint: "/api/assets" } } }} />;
       }
@@ -32,7 +32,7 @@ describe("framework compatibility snippets", () => {
 
   it("transpiles Vite/CRA/Remix-style usage", () => {
     const output = transpile(`
-      import { BugReporter, BugReporterProvider, useBugReporter } from "bug-reporter";
+      import { BugReporter, BugReporterProvider, useBugReporter } from "@fogg/bug-reporter";
       function Child(){ const api = useBugReporter(); return <button onClick={api.open}>Open</button>; }
       export function App() {
         return <BugReporter config={{ apiEndpoint: "/api/report", storage: { mode: "proxy", proxy: { uploadEndpoint: "/api/assets" } } }} />;

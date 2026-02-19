@@ -1,6 +1,6 @@
 # Vite Sandbox
 
-Small local app to manually test the `bug-reporter` SDK.
+Small local app to manually test the `@fogg/bug-reporter` SDK.
 
 ## Run
 

@@ -1,5 +1,5 @@
 {
-  "name": "bug-reporter",
+  "name": "@fogg/bug-reporter",
   "version": "0.1.0",
   "description": "Production-ready React bug reporting SDK with screenshot, recording, diagnostics, and pluggable storage backends.",
   "license": "MIT",

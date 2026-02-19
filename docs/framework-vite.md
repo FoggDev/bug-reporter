@@ -1,8 +1,8 @@
 # Vite
 
 ```tsx
-import { BugReporter } from "bug-reporter";
-import "bug-reporter/styles.css";
+import { BugReporter } from "@fogg/bug-reporter";
+import "@fogg/bug-reporter/styles.css";
 
 export function App() {
   return (

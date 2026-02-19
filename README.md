@@ -1,18 +1,18 @@
 # bug-reporter
 
-`bug-reporter` is a React 16.8+ SDK for collecting production bug reports with screenshot capture, short screen recording, diagnostics, and pluggable storage backends.
+`@fogg/bug-reporter` is a React 16.8+ SDK for collecting production bug reports with screenshot capture, short screen recording, diagnostics, and pluggable storage backends.
 
 ## Install
 
 ```bash
-npm install bug-reporter
+npm install @fogg/bug-reporter
 ```
 
 ## Quickstart
 
 ```tsx
-import { BugReporter } from "bug-reporter";
-import "bug-reporter/styles.css";
+import { BugReporter } from "@fogg/bug-reporter";
+import "@fogg/bug-reporter/styles.css";
 
 export function App() {
   return (

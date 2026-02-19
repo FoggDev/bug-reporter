@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "bug-reporter": path.resolve(__dirname, "../../../src/index.ts")
+      "@fogg/bug-reporter": path.resolve(__dirname, "../../../src/index.ts")
     }
   }
 });

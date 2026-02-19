@@ -15,8 +15,8 @@
     "types": ["vitest/globals", "@testing-library/jest-dom"],
     "baseUrl": ".",
     "paths": {
-      "bug-reporter": ["./src/index.ts"],
-      "bug-reporter/*": ["./src/*"]
+      "@fogg/bug-reporter": ["./src/index.ts"],
+      "@fogg/bug-reporter/*": ["./src/*"]
     }
   },
   "include": ["src", "tests", "tsup.config.ts", "vitest.config.ts", "playwright.config.ts"],

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { BugReporter } from "bug-reporter";
-import type { CustomFormProps } from "bug-reporter";
+import { BugReporter } from "@fogg/bug-reporter";
+import type { CustomFormProps } from "@fogg/bug-reporter";
 
 declare global {
   interface Window {
