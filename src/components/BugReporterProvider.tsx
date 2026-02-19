@@ -49,7 +49,8 @@ const BASE_STATE: BugReporterState = {
 
 export function BugReporterProvider({ config, children }: BugReporterProviderProps) {
   const resolvedConfig = useMemo(() => withDefaults(config), [config]);
-  const initialDockSide: DockSide = resolvedConfig.theme.position === "bottom-left" ? "left" : "right";
+  const initialDockSide: DockSide =
+    resolvedConfig.theme.position === "bottom-left" || resolvedConfig.theme.position === "top-left" ? "left" : "right";
   const [state, setState] = useState<BugReporterState>(() => ({
     ...BASE_STATE,
     dockSide: initialDockSide,

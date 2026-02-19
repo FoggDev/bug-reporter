@@ -5,11 +5,13 @@ import { loadScreenRecording } from "../core/lazy";
 import { blobToObjectUrl, uid } from "../core/utils";
 import { validateVideoSize } from "../core/validation";
 import { useBugReporter } from "../hooks";
+import { getButtonStyle, inlineStyles } from "../styles/inline";
 
 type StepRecordingProps = {
   onBack?: () => void;
   onNext?: () => void;
   embedded?: boolean;
+  compact?: boolean;
 };
 
 type SharedRecordingState = {
@@ -24,7 +26,7 @@ function notifySubscribers(): void {
   subscribers.forEach((handler) => handler());
 }
 
-export function StepRecording({ onBack, onNext, embedded = false }: StepRecordingProps) {
+export function StepRecording({ onBack, onNext, embedded = false, compact = false }: StepRecordingProps) {
   const {
     config,
     state: { assets },
@@ -116,34 +118,61 @@ export function StepRecording({ onBack, onNext, embedded = false }: StepRecordin
     };
   }, []);
 
-  return (
-    <div className={embedded ? undefined : "br-step"}>
-      {embedded ? <h3>Screen recording</h3> : <h2>Screen recording</h2>}
-      <p>Record up to {config.storage.limits.maxVideoSeconds} seconds. You can minimize this sidebar while recording.</p>
+  if (compact) {
+    const compactRecordingAction = !isRecording ? (
+      <button type="button" style={{ ...getButtonStyle("primary", { fullWidth: true }), ...inlineStyles.captureButton }} onClick={start}>
+        <svg style={inlineStyles.captureIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="4.5" />
+          <path d="M3.5 8.5h3l1.2-2h8.6l1.2 2h3v7h-3l-1.2 2H7.7l-1.2-2h-3z" />
+        </svg>
+        <span>{recording ? "Retake recording" : "Record a video"}</span>
+        {recording ? <span style={inlineStyles.captureDone}>Saved</span> : null}
+      </button>
+    ) : (
+      <button type="button" style={{ ...getButtonStyle("danger", { fullWidth: true }), ...inlineStyles.captureButton }} onClick={stop}>
+        <svg style={inlineStyles.captureIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="7" y="7" width="10" height="10" />
+        </svg>
+        <span>Stop ({seconds}s)</span>
+      </button>
+    );
 
-      <div className="br-actions">
+    return (
+      <div style={inlineStyles.captureItem}>
+        {compactRecordingAction}
+        {error ? <p style={{ ...inlineStyles.error, marginTop: "8px" }}>{error}</p> : null}
+      </div>
+    );
+  }
+
+  return (
+    <div style={embedded ? undefined : inlineStyles.step}>
+      {embedded ? <h3 style={inlineStyles.h3}>Screen recording</h3> : <h2 style={inlineStyles.h2}>Screen recording</h2>}
+      <p style={inlineStyles.p}>Record up to {config.storage.limits.maxVideoSeconds} seconds. You can minimize this sidebar while recording.</p>
+
+      <div style={inlineStyles.actions}>
         {onBack ? (
-          <button type="button" className="br-btn br-btn-secondary" onClick={onBack} disabled={isRecording}>
+          <button type="button" style={getButtonStyle("secondary", { disabled: isRecording })} onClick={onBack} disabled={isRecording}>
             Back
           </button>
         ) : null}
         {!isRecording ? (
-          <button type="button" className="br-btn br-btn-primary" onClick={start}>
-            {recording ? "Retake recording" : "Start recording"}
+          <button type="button" style={getButtonStyle("primary")} onClick={start}>
+            {recording ? "Retake recording" : "Record a video"}
           </button>
         ) : (
-          <button type="button" className="br-btn br-btn-danger" onClick={stop}>
+          <button type="button" style={getButtonStyle("danger")} onClick={stop}>
             Stop ({seconds}s)
           </button>
         )}
       </div>
 
-      {recording ? <video src={recording.previewUrl} className="br-preview" controls /> : null}
-      {error ? <p className="br-error">{error}</p> : null}
+      {recording ? <video src={recording.previewUrl} style={inlineStyles.preview} controls /> : null}
+      {error ? <p style={inlineStyles.error}>{error}</p> : null}
 
       {onNext ? (
-        <div className="br-actions">
-          <button type="button" className="br-btn br-btn-primary" onClick={onNext}>
+        <div style={inlineStyles.actions}>
+          <button type="button" style={getButtonStyle("primary")} onClick={onNext}>
             Continue
           </button>
         </div>

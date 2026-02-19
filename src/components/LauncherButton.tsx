@@ -1,10 +1,19 @@
 
 import { useBugReporter } from "../hooks";
+import type { LauncherPosition, ThemeMode } from "../types";
+import { getLauncherStyle } from "../styles/inline";
 
-export function LauncherButton() {
+type LauncherButtonProps = {
+  position?: LauncherPosition;
+  text?: string;
+  themeMode?: ThemeMode;
+  buttonColor?: string;
+};
+
+export function LauncherButton({ position, text, themeMode = "dark", buttonColor }: LauncherButtonProps) {
   const {
     config,
-    state: { isOpen, draft, assets },
+    state: { isOpen },
     open
   } = useBugReporter();
 
@@ -12,22 +21,25 @@ export function LauncherButton() {
     return null;
   }
 
-  const positionClass = config.theme.position === "bottom-left" ? "is-left" : "is-right";
-  const hasActiveDraft = Boolean(draft.title || draft.description || assets.length);
+  const resolvedPosition = position ?? config.theme.position ?? "bottom-right";
+  const label = text ?? "Get Help";
+  const resolvedButtonColor = buttonColor ?? config.theme.primaryColor;
+  const launcherStyle = getLauncherStyle({
+    position: resolvedPosition,
+    borderRadius: config.theme.borderRadius,
+    zIndex: config.theme.zIndex,
+    buttonColor: resolvedButtonColor,
+    themeMode
+  });
 
   return (
     <button
       type="button"
-      className={`br-launcher ${positionClass}`}
-      style={{
-        backgroundColor: config.theme.primaryColor,
-        borderRadius: config.theme.borderRadius,
-        zIndex: config.theme.zIndex
-      }}
+      style={launcherStyle}
       onClick={open}
       aria-label="Open bug reporter"
     >
-      {hasActiveDraft ? "Resume report" : "Get Help"}
+      {label}
     </button>
   );
 }

@@ -3,18 +3,21 @@ import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useFocusTrap } from "../hooks";
-import type { DockSide } from "../types";
+import type { DockSide, ThemeMode } from "../types";
+import { getModalOverlayStyle, getModalStyle } from "../styles/inline";
 
 type ModalProps = {
   isOpen: boolean;
   dockSide: DockSide;
+  themeMode: ThemeMode;
+  buttonColor: string;
   title: string;
   zIndex: number;
   onRequestClose: () => void;
   children: ReactNode;
 };
 
-export function Modal({ isOpen, dockSide, title, zIndex, onRequestClose, children }: ModalProps) {
+export function Modal({ isOpen, dockSide, themeMode, buttonColor, title, zIndex, onRequestClose, children }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useFocusTrap(isOpen, dialogRef);
 
@@ -38,9 +41,12 @@ export function Modal({ isOpen, dockSide, title, zIndex, onRequestClose, childre
     return null;
   }
 
+  const overlayStyle = getModalOverlayStyle({ dockSide, themeMode, zIndex });
+  const modalStyle = getModalStyle({ dockSide, themeMode, buttonColor });
+
   return createPortal(
-    <div className={`br-modal-overlay is-${dockSide}`} style={{ zIndex }}>
-      <div ref={dialogRef} className={`br-modal is-${dockSide}`} role="dialog" aria-modal="true" aria-label={title}>
+    <div style={overlayStyle}>
+      <div ref={dialogRef} style={modalStyle} role="dialog" aria-modal="true" aria-label={title}>
         {children}
       </div>
     </div>,

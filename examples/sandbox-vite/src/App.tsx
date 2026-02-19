@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { BugReporter } from "bug-reporter";
 import type { CustomFormProps } from "bug-reporter";
-import "bug-reporter/styles.css";
 
 declare global {
   interface Window {
@@ -167,6 +166,8 @@ export function App() {
 
       <BugReporter
         CustomForm={SeverityCustomForm}
+        themeMode="light"
+        buttonColor="#374151"
         config={{
           apiEndpoint: "/sandbox/report",
           projectId: "sandbox-vite",

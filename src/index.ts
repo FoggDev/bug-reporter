@@ -1,6 +1,4 @@
 
-import "./styles/index.css";
-
 export { BugReporter, BugReporterProvider } from "./components";
 export { useBugReporter } from "./hooks";
 
@@ -16,9 +14,11 @@ export type {
   DockSide,
   DiagnosticsSnapshot,
   FeatureFlags,
+  LauncherPosition,
   StorageMode,
   StorageProvider,
   ThemeConfig,
+  ThemeMode,
   UploadFile,
   UploadInstruction
 } from "./types";

@@ -9,15 +9,15 @@ import {
   useRef,
   useState
 } from "react";
+import { getButtonStyle, inlineStyles } from "../styles/inline";
 
-type Tool = "rectangle" | "arrow" | "text";
+type Tool = "rectangle" | "arrow";
 
 type Point = { x: number; y: number };
 
 type Shape =
   | { kind: "rectangle"; start: Point; end: Point }
-  | { kind: "arrow"; start: Point; end: Point }
-  | { kind: "text"; at: Point; text: string };
+  | { kind: "arrow"; start: Point; end: Point };
 
 export type AnnotationCanvasHandle = {
   exportBlob: () => Promise<Blob>;
@@ -85,10 +85,6 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasHandle, AnnotationCan
         if (shape.kind === "arrow") {
           drawArrow(ctx, shape.start, shape.end);
         }
-
-        if (shape.kind === "text") {
-          ctx.fillText(shape.text, shape.at.x, shape.at.y);
-        }
       });
     },
     [draftShape, shapes]
@@ -142,13 +138,6 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasHandle, AnnotationCan
 
   const onMouseDown = (event: MouseEvent<HTMLCanvasElement>) => {
     const point = getCoords(event);
-    if (tool === "text") {
-      const text = window.prompt("Annotation text");
-      if (text) {
-        setShapes((prev) => [...prev, { kind: "text", at: point, text }]);
-      }
-      return;
-    }
     dragStartRef.current = point;
   };
 
@@ -213,32 +202,31 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasHandle, AnnotationCan
   const toolButtons = useMemo(
     () => [
       { value: "rectangle", label: "Rectangle" },
-      { value: "arrow", label: "Arrow" },
-      { value: "text", label: "Text" }
+      { value: "arrow", label: "Arrow" }
     ] as const,
     []
   );
 
   return (
-    <div className="br-annotation">
-      <div className="br-annotation-tools" role="toolbar" aria-label="Annotation tools">
+    <div style={inlineStyles.annotation}>
+      <div style={inlineStyles.annotationTools} role="toolbar" aria-label="Annotation tools">
         {toolButtons.map((option) => (
           <button
             key={option.value}
             type="button"
-            className={`br-btn br-btn-secondary ${tool === option.value ? "is-active" : ""}`}
+            style={getButtonStyle("secondary", { active: tool === option.value })}
             onClick={() => setTool(option.value)}
           >
             {option.label}
           </button>
         ))}
-        <button type="button" className="br-btn br-btn-secondary" onClick={() => setShapes([])}>
+        <button type="button" style={getButtonStyle("secondary")} onClick={() => setShapes([])}>
           Clear
         </button>
       </div>
       <canvas
         ref={canvasRef}
-        className="br-annotation-canvas"
+        style={inlineStyles.annotationCanvas}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}

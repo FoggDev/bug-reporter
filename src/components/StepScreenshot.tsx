@@ -5,6 +5,7 @@ import { blobToObjectUrl, uid } from "../core/utils";
 import { validateScreenshotSize } from "../core/validation";
 import { useBugReporter } from "../hooks";
 import { AnnotationCanvas, type AnnotationCanvasHandle } from "./AnnotationCanvas";
+import { getButtonStyle, inlineStyles } from "../styles/inline";
 
 type StepScreenshotProps = {
   onBack: () => void;
@@ -71,30 +72,33 @@ export function StepScreenshot({ onBack, onNext }: StepScreenshotProps) {
   };
 
   return (
-    <div className="br-step">
-      <h2>Capture screenshot</h2>
-      <p>Select an area of the screen to capture.</p>
+    <div style={inlineStyles.step}>
+      <h2 style={inlineStyles.h2}>Capture screenshot</h2>
+      <p style={inlineStyles.p}>Select an area of the screen to capture.</p>
 
-      <div className="br-actions">
-        <button type="button" className="br-btn br-btn-secondary" onClick={onBack}>
+      <div style={inlineStyles.actions}>
+        <button type="button" style={getButtonStyle("secondary")} onClick={onBack}>
           Back
         </button>
-        <button type="button" className="br-btn br-btn-primary" onClick={startCapture} disabled={isCapturing}>
+        <button type="button" style={getButtonStyle("primary", { disabled: isCapturing })} onClick={startCapture} disabled={isCapturing}>
           {isCapturing ? "Capturing..." : screenshot ? "Retake screenshot" : "Capture area"}
         </button>
       </div>
 
       {screenshot ? (
-        <div className="br-preview-wrapper">
-          <img src={screenshot.previewUrl} alt="Screenshot preview" className="br-preview" />
-          {config.features.annotations ? <AnnotationCanvas ref={annotationRef} imageUrl={screenshot.previewUrl} /> : null}
+        <div style={inlineStyles.previewWrapper}>
+          {config.features.annotations ? (
+            <AnnotationCanvas ref={annotationRef} imageUrl={screenshot.previewUrl} />
+          ) : (
+            <img src={screenshot.previewUrl} alt="Screenshot preview" style={inlineStyles.preview} />
+          )}
         </div>
       ) : null}
 
-      {error ? <p className="br-error">{error}</p> : null}
+      {error ? <p style={inlineStyles.error}>{error}</p> : null}
 
-      <div className="br-actions">
-        <button type="button" className="br-btn br-btn-primary" onClick={continueToNext}>
+      <div style={inlineStyles.actions}>
+        <button type="button" style={getButtonStyle("primary")} onClick={continueToNext}>
           Continue
         </button>
       </div>

@@ -6,6 +6,8 @@ export type ReportEnvironment = "development" | "staging" | "production";
 export type AssetType = "screenshot" | "recording" | "attachment";
 export type FlowStep = "describe" | "screenshot" | "recording" | "review" | "submitting" | "success";
 export type DockSide = "left" | "right" | "top" | "bottom";
+export type LauncherPosition = "bottom-right" | "bottom-left" | "top-right" | "top-left";
+export type ThemeMode = "dark" | "light";
 
 export type FeatureFlags = {
   screenshot?: boolean;
@@ -17,7 +19,7 @@ export type FeatureFlags = {
 
 export type ThemeConfig = {
   primaryColor?: string;
-  position?: "bottom-right" | "bottom-left";
+  position?: LauncherPosition;
   zIndex?: number;
   borderRadius?: string;
 };
