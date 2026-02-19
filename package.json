@@ -39,8 +39,8 @@
     "sandbox:vite:install": "npm --prefix examples/sandbox-vite install"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
   },
   "dependencies": {
     "html2canvas": "^1.4.1"

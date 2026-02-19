@@ -1,6 +1,6 @@
 # bug-reporter
 
-`bug-reporter` is a React 18+ SDK for collecting production bug reports with screenshot capture, short screen recording, diagnostics, and pluggable storage backends.
+`bug-reporter` is a React 16.8+ SDK for collecting production bug reports with screenshot capture, short screen recording, diagnostics, and pluggable storage backends.
 
 ## Install
 
