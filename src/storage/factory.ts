@@ -1,3 +1,4 @@
+import { BugReporterError } from "../types";
 import type { RequiredBugReporterConfig, StorageProvider } from "../types";
 import { LocalPublicProvider } from "./local-public";
 import { ProxyProvider } from "./proxy";
@@ -7,7 +8,7 @@ export function createStorageProvider(config: RequiredBugReporterConfig): Storag
   if (config.storage.mode === "s3-presigned") {
     const presignEndpoint = config.storage.s3?.presignEndpoint;
     if (!presignEndpoint) {
-      throw new Error("storage.s3.presignEndpoint is required for s3-presigned mode.");
+      throw new BugReporterError("UPLOAD_ERROR", "Screenshot/video upload is not configured. Please contact support.");
     }
     return new S3PresignedProvider({
       presignEndpoint,
@@ -20,7 +21,7 @@ export function createStorageProvider(config: RequiredBugReporterConfig): Storag
   if (config.storage.mode === "local-public") {
     const uploadEndpoint = config.storage.local?.uploadEndpoint;
     if (!uploadEndpoint) {
-      throw new Error("storage.local.uploadEndpoint is required for local-public mode.");
+      throw new BugReporterError("UPLOAD_ERROR", "Screenshot/video upload is not configured. Please contact support.");
     }
     return new LocalPublicProvider({
       uploadEndpoint,
@@ -32,7 +33,7 @@ export function createStorageProvider(config: RequiredBugReporterConfig): Storag
 
   const uploadEndpoint = config.storage.proxy?.uploadEndpoint;
   if (!uploadEndpoint) {
-    throw new Error("storage.proxy.uploadEndpoint is required for proxy mode.");
+    throw new BugReporterError("UPLOAD_ERROR", "Screenshot/video upload is not configured. Please contact support.");
   }
 
   return new ProxyProvider({

@@ -13,23 +13,33 @@ export class S3PresignedProvider implements StorageProvider {
   constructor(private readonly options: S3PresignedProviderOptions) {}
 
   async prepareUploads(files: UploadFile[]): Promise<UploadInstruction[]> {
-    const response = await fetch(this.options.presignEndpoint, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        ...this.options.authHeaders
-      },
-      credentials: this.options.withCredentials ? "include" : "same-origin",
-      body: JSON.stringify({ files })
-    });
-
-    if (!response.ok) {
-      throw new BugReporterError("UPLOAD_ERROR", `Failed to prepare uploads (${response.status}).`);
+    let response: Response;
+    try {
+      response = await fetch(this.options.presignEndpoint, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...this.options.authHeaders
+        },
+        credentials: this.options.withCredentials ? "include" : "same-origin",
+        body: JSON.stringify({ files })
+      });
+    } catch (error) {
+      throw new BugReporterError("UPLOAD_ERROR", "We couldn't prepare file uploads right now. Please try again.", error);
     }
 
-    const payload = (await response.json()) as PresignResponse;
+    if (!response.ok) {
+      throw new BugReporterError("UPLOAD_ERROR", "We couldn't prepare file uploads right now. Please try again.");
+    }
+
+    let payload: PresignResponse;
+    try {
+      payload = (await response.json()) as PresignResponse;
+    } catch (error) {
+      throw new BugReporterError("UPLOAD_ERROR", "Upload service returned an invalid response. Please try again.", error);
+    }
     if (!payload.uploads?.length) {
-      throw new BugReporterError("UPLOAD_ERROR", "Presign endpoint did not return upload instructions.");
+      throw new BugReporterError("UPLOAD_ERROR", "Upload service returned no upload instructions. Please try again.");
     }
 
     return payload.uploads;
@@ -43,23 +53,33 @@ export class S3PresignedProvider implements StorageProvider {
       Object.entries(instruction.fields).forEach(([key, value]) => formData.append(key, value));
       formData.append("file", blob);
 
-      const response = await fetch(instruction.uploadUrl, {
-        method: "POST",
-        body: formData
-      });
+      let response: Response;
+      try {
+        response = await fetch(instruction.uploadUrl, {
+          method: "POST",
+          body: formData
+        });
+      } catch (error) {
+        throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.", error);
+      }
 
       if (!response.ok) {
-        throw new BugReporterError("UPLOAD_ERROR", `S3 form upload failed (${response.status}).`);
+        throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.");
       }
     } else {
-      const response = await fetch(instruction.uploadUrl, {
-        method: instruction.method,
-        headers: instruction.headers,
-        body: blob
-      });
+      let response: Response;
+      try {
+        response = await fetch(instruction.uploadUrl, {
+          method: instruction.method,
+          headers: instruction.headers,
+          body: blob
+        });
+      } catch (error) {
+        throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.", error);
+      }
 
       if (!response.ok) {
-        throw new BugReporterError("UPLOAD_ERROR", `S3 upload failed (${response.status}).`);
+        throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.");
       }
     }
 

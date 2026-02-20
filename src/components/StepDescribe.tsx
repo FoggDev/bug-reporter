@@ -1,5 +1,5 @@
 import type { CustomFormComponent } from "../types";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
 import { loadScreenshotCapture } from "../core/lazy";
 import { blobToObjectUrl, uid } from "../core/utils";
 import { validateScreenshotSize } from "../core/validation";
@@ -26,7 +26,9 @@ export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
   const recording = useMemo(() => assets.find((asset) => asset.type === "recording"), [assets]);
   const annotationRef = useRef<AnnotationCanvasHandle | null>(null);
   const customFormRef = useRef<HTMLDivElement | null>(null);
+  const screenshotInputRef = useRef<HTMLInputElement | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isDraggingScreenshot, setIsDraggingScreenshot] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,6 +96,66 @@ export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
       setError(captureError instanceof Error ? captureError.message : "Screenshot capture failed.");
     } finally {
       setIsCapturing(false);
+    }
+  };
+
+  const applyScreenshotFile = (file?: File) => {
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Only image files are supported for screenshots.");
+      return;
+    }
+
+    try {
+      validateScreenshotSize(file.size, config.storage.limits.maxScreenshotBytes);
+      setScreenshot({
+        id: uid("screenshot"),
+        type: "screenshot",
+        blob: file,
+        previewUrl: blobToObjectUrl(file),
+        mimeType: file.type || "image/png",
+        filename: file.name || `screenshot-${Date.now()}.png`,
+        size: file.size
+      });
+      setError(null);
+    } catch (fileError) {
+      setError(fileError instanceof Error ? fileError.message : "Invalid screenshot file.");
+    }
+  };
+
+  const onScreenshotInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    applyScreenshotFile(event.target.files?.[0]);
+    event.currentTarget.value = "";
+  };
+
+  const onScreenshotDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDraggingScreenshot(false);
+    applyScreenshotFile(event.dataTransfer.files?.[0]);
+  };
+
+  const onScreenshotDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!isDraggingScreenshot) {
+      setIsDraggingScreenshot(true);
+    }
+  };
+
+  const onScreenshotDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDraggingScreenshot(false);
+  };
+
+  const onScreenshotDropZoneKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      screenshotInputRef.current?.click();
     }
   };
 
@@ -185,6 +247,30 @@ export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
                 ? "Capture the relevant area before continuing."
                 : `Record up to ${config.storage.limits.maxVideoSeconds} seconds.`}
           </p>
+          {config.features.screenshot ? (
+            <>
+              <div
+                style={{ ...inlineStyles.dropZone, ...(isDraggingScreenshot ? inlineStyles.dropZoneActive : {}) }}
+                onDrop={onScreenshotDrop}
+                onDragOver={onScreenshotDragOver}
+                onDragLeave={onScreenshotDragLeave}
+                onClick={() => screenshotInputRef.current?.click()}
+                onKeyDown={onScreenshotDropZoneKeyDown}
+                role="button"
+                tabIndex={0}
+                aria-label="Drag and drop screenshot"
+              >
+                Drag and drop a screenshot here, or click to upload.
+              </div>
+              <input
+                ref={screenshotInputRef}
+                type="file"
+                accept="image/*"
+                style={inlineStyles.hiddenFileInput}
+                onChange={onScreenshotInputChange}
+              />
+            </>
+          ) : null}
 
           {screenshot ? (
             <div style={inlineStyles.previewWrapper}>

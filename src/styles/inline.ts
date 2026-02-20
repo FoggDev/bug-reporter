@@ -266,6 +266,24 @@ export const inlineStyles = {
     color: "var(--br-muted)",
     fontSize: "13px"
   } as CSSProperties,
+  dropZone: {
+    marginTop: "10px",
+    border: "1px dashed var(--br-border)",
+    borderRadius: "10px",
+    padding: "12px",
+    textAlign: "center",
+    background: "var(--br-surface-bg)",
+    color: "var(--br-muted)",
+    fontSize: "13px",
+    cursor: "pointer"
+  } as CSSProperties,
+  dropZoneActive: {
+    borderColor: "var(--br-primary)",
+    background: "var(--br-secondary-bg)"
+  } as CSSProperties,
+  hiddenFileInput: {
+    display: "none"
+  } as CSSProperties,
   previewWrapper: {
     display: "grid",
     gap: "12px",

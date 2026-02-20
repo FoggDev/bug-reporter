@@ -11,6 +11,14 @@ type LocalPublicProviderOptions = {
 export class LocalPublicProvider implements StorageProvider {
   constructor(private readonly options: LocalPublicProviderOptions) {}
 
+  private async readUploadResponse(response: Response): Promise<{ url?: string; key?: string }> {
+    try {
+      return (await response.json()) as { url?: string; key?: string };
+    } catch {
+      return {};
+    }
+  }
+
   async prepareUploads(files: UploadFile[]): Promise<UploadInstruction[]> {
     return files.map((file) => ({
       id: file.id,
@@ -28,18 +36,23 @@ export class LocalPublicProvider implements StorageProvider {
     form.append("id", instruction.id);
     form.append("type", instruction.type);
 
-    const response = await fetch(instruction.uploadUrl, {
-      method: "POST",
-      headers: instruction.headers,
-      credentials: this.options.withCredentials ? "include" : "same-origin",
-      body: form
-    });
-
-    if (!response.ok) {
-      throw new BugReporterError("UPLOAD_ERROR", `Local upload failed (${response.status}).`);
+    let response: Response;
+    try {
+      response = await fetch(instruction.uploadUrl, {
+        method: "POST",
+        headers: instruction.headers,
+        credentials: this.options.withCredentials ? "include" : "same-origin",
+        body: form
+      });
+    } catch (error) {
+      throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.", error);
     }
 
-    const payload = (await response.json()) as { url: string; key?: string };
+    if (!response.ok) {
+      throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.");
+    }
+
+    const payload = await this.readUploadResponse(response);
     onProgress?.(1);
 
     return {

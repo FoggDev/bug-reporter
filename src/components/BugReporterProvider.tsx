@@ -191,7 +191,11 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
         step: "success"
       }));
 
-      resolvedConfig.hooks.onSuccess?.(response);
+      try {
+        resolvedConfig.hooks.onSuccess?.(response);
+      } catch (hookError) {
+        console.warn("[bug-reporter] onSuccess hook threw an error", hookError);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected submit failure.";
       setState((prev) => ({
@@ -200,7 +204,11 @@ export function BugReporterProvider({ config, children }: BugReporterProviderPro
         step: "review",
         error: message
       }));
-      resolvedConfig.hooks.onError?.(error as any);
+      try {
+        resolvedConfig.hooks.onError?.(error as any);
+      } catch (hookError) {
+        console.warn("[bug-reporter] onError hook threw an error", hookError);
+      }
     }
   }, [resolvedConfig, state.assets, state.attributes, state.draft]);
 

@@ -10,6 +10,14 @@ type ProxyProviderOptions = {
 export class ProxyProvider implements StorageProvider {
   constructor(private readonly options: ProxyProviderOptions) {}
 
+  private async readUploadResponse(response: Response): Promise<{ url?: string; key?: string }> {
+    try {
+      return (await response.json()) as { url?: string; key?: string };
+    } catch {
+      return {};
+    }
+  }
+
   async prepareUploads(files: UploadFile[]): Promise<UploadInstruction[]> {
     return files.map((file) => ({
       id: file.id,
@@ -22,23 +30,31 @@ export class ProxyProvider implements StorageProvider {
 
   async upload(instruction: UploadInstruction, blob: Blob, onProgress?: (progress: number) => void): Promise<AssetReference> {
     onProgress?.(0);
-    const response = await fetch(instruction.uploadUrl, {
-      method: "POST",
-      headers: {
-        "content-type": blob.type || "application/octet-stream",
-        "x-bug-reporter-asset-id": instruction.id,
-        "x-bug-reporter-asset-type": instruction.type,
-        ...instruction.headers
-      },
-      credentials: this.options.withCredentials ? "include" : "same-origin",
-      body: blob
-    });
-
-    if (!response.ok) {
-      throw new BugReporterError("UPLOAD_ERROR", `Proxy upload failed (${response.status}).`);
+    let response: Response;
+    try {
+      response = await fetch(instruction.uploadUrl, {
+        method: "POST",
+        headers: {
+          "content-type": blob.type || "application/octet-stream",
+          "x-bug-reporter-asset-id": instruction.id,
+          "x-bug-reporter-asset-type": instruction.type,
+          ...instruction.headers
+        },
+        credentials: this.options.withCredentials ? "include" : "same-origin",
+        body: blob
+      });
+    } catch (error) {
+      throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.", error);
     }
 
-    const payload = (await response.json()) as { url: string; key?: string };
+    if (!response.ok) {
+      throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.");
+    }
+
+    const payload = await this.readUploadResponse(response);
+    if (!payload.url) {
+      throw new BugReporterError("UPLOAD_ERROR", "Upload service returned an invalid response. Please try again.");
+    }
     onProgress?.(1);
 
     return {

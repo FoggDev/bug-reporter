@@ -20,13 +20,21 @@ type SubmitReportOptions = {
 };
 
 export async function submitReport(options: SubmitReportOptions): Promise<BugReportResponse> {
-  const provider = createStorageProvider(options.config);
-  const assetReferences = await uploadAssets({
-    provider,
-    assets: options.assets,
-    retries: 2,
-    onProgress: options.onUploadProgress
-  });
+  let assetReferences: Awaited<ReturnType<typeof uploadAssets>>;
+  try {
+    const provider = createStorageProvider(options.config);
+    assetReferences = await uploadAssets({
+      provider,
+      assets: options.assets,
+      retries: 2,
+      onProgress: options.onUploadProgress
+    });
+  } catch (error) {
+    if (error instanceof BugReporterError) {
+      throw error;
+    }
+    throw new BugReporterError("UPLOAD_ERROR", "We couldn't upload your screenshot/video right now. Please try again.", error);
+  }
 
   const payloadBase: BugReportPayload = {
     issue: {
@@ -67,28 +75,47 @@ export async function submitReport(options: SubmitReportOptions): Promise<BugRep
     attributes: options.attributes
   };
 
-  const transformed = options.config.hooks.beforeSubmit ? await options.config.hooks.beforeSubmit(payloadBase) : payloadBase;
-  if (!transformed) {
-    throw new BugReporterError("ABORTED", "Submission aborted by beforeSubmit hook.");
+  let transformed = payloadBase;
+  if (options.config.hooks.beforeSubmit) {
+    try {
+      const nextPayload = await options.config.hooks.beforeSubmit(payloadBase);
+      if (!nextPayload) {
+        throw new BugReporterError("ABORTED", "Submission cancelled.");
+      }
+      transformed = nextPayload;
+    } catch (error) {
+      if (error instanceof BugReporterError) {
+        throw error;
+      }
+      throw new BugReporterError("SUBMIT_ERROR", "We couldn't prepare your report right now. Please try again.", error);
+    }
   }
 
   console.log("[bug-reporter] payload to submit", transformed);
   console.log("[bug-reporter] payload to submit (json)", JSON.stringify(transformed, null, 2));
 
-  const response = await fetch(options.config.apiEndpoint, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      ...options.config.auth.headers
-    },
-    credentials: options.config.auth.withCredentials ? "include" : "same-origin",
-    body: JSON.stringify(transformed)
-  });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new BugReporterError("SUBMIT_ERROR", `Report submit failed (${response.status}): ${body || response.statusText}`);
+  let response: Response;
+  try {
+    response = await fetch(options.config.apiEndpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...options.config.auth.headers
+      },
+      credentials: options.config.auth.withCredentials ? "include" : "same-origin",
+      body: JSON.stringify(transformed)
+    });
+  } catch (error) {
+    throw new BugReporterError("SUBMIT_ERROR", "We couldn't submit your report right now. Please try again.", error);
   }
 
-  return (await response.json()) as BugReportResponse;
+  if (!response.ok) {
+    throw new BugReporterError("SUBMIT_ERROR", "We couldn't submit your report right now. Please try again.");
+  }
+
+  try {
+    return (await response.json()) as BugReportResponse;
+  } catch {
+    return {};
+  }
 }

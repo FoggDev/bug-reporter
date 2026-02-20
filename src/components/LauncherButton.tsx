@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import { useBugReporter } from "../hooks";
 import type { LauncherPosition, ThemeMode } from "../types";
 import { getLauncherStyle } from "../styles/inline";
@@ -24,6 +24,7 @@ export function LauncherButton({ position, text, themeMode = "dark", buttonColor
   const resolvedPosition = position ?? config.theme.position ?? "bottom-right";
   const label = text ?? "Get Help";
   const resolvedButtonColor = buttonColor ?? config.theme.primaryColor;
+  const [isHovered, setIsHovered] = useState(false);
   const launcherStyle = getLauncherStyle({
     position: resolvedPosition,
     borderRadius: config.theme.borderRadius,
@@ -35,8 +36,13 @@ export function LauncherButton({ position, text, themeMode = "dark", buttonColor
   return (
     <button
       type="button"
-      style={launcherStyle}
+      style={{
+        ...launcherStyle,
+        backgroundColor: isHovered ? "#8120C7" : resolvedButtonColor
+      }}
       onClick={open}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       aria-label="Open bug reporter"
     >
       {label}

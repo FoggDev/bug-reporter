@@ -149,7 +149,7 @@ export function BugReporter({
   themeMode = "dark",
   buttonColor
 }: BugReporterProps) {
-  const resolvedButtonColor = buttonColor ?? config.theme?.primaryColor ?? "#3b82f6";
+  const resolvedButtonColor = buttonColor ?? config.theme?.primaryColor ?? "#390E58";
 
   return (
     <BugReporterProvider config={config}>
