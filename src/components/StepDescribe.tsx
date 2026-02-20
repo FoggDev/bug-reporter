@@ -28,6 +28,7 @@ export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
   const customFormRef = useRef<HTMLDivElement | null>(null);
   const screenshotInputRef = useRef<HTMLInputElement | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isScreenshotHover, setIsScreenshotHover] = useState(false);
   const [isDraggingScreenshot, setIsDraggingScreenshot] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -225,8 +226,14 @@ export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
               <div style={inlineStyles.captureItem}>
                 <button
                   type="button"
-                  style={{ ...getButtonStyle("primary", { disabled: isCapturing, fullWidth: true }), ...inlineStyles.captureButton }}
+                  style={{
+                    ...getButtonStyle("primary", { disabled: isCapturing, fullWidth: true }),
+                    ...inlineStyles.captureButton,
+                    ...(isScreenshotHover && !isCapturing ? { background: "#8120C7" } : {})
+                  }}
                   onClick={startCapture}
+                  onMouseEnter={() => setIsScreenshotHover(true)}
+                  onMouseLeave={() => setIsScreenshotHover(false)}
                   disabled={isCapturing}
                 >
                   <svg style={inlineStyles.captureIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">

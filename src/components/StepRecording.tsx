@@ -37,6 +37,7 @@ export function StepRecording({ onBack, onNext, embedded = false, compact = fals
   const activeRef = useRef<ActiveRecording | null>(null);
   const mountedRef = useRef(true);
   const [isRecording, setIsRecording] = useState(Boolean(sharedRecording));
+  const [isRecordHover, setIsRecordHover] = useState(false);
   const [seconds, setSeconds] = useState(sharedRecording?.seconds ?? 0);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,7 +121,17 @@ export function StepRecording({ onBack, onNext, embedded = false, compact = fals
 
   if (compact) {
     const compactRecordingAction = !isRecording ? (
-      <button type="button" style={{ ...getButtonStyle("primary", { fullWidth: true }), ...inlineStyles.captureButton }} onClick={start}>
+      <button
+        type="button"
+        style={{
+          ...getButtonStyle("primary", { fullWidth: true }),
+          ...inlineStyles.captureButton,
+          ...(isRecordHover ? { background: "#8120C7" } : {})
+        }}
+        onClick={start}
+        onMouseEnter={() => setIsRecordHover(true)}
+        onMouseLeave={() => setIsRecordHover(false)}
+      >
         <svg style={inlineStyles.captureIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <circle cx="12" cy="12" r="4.5" />
           <path d="M3.5 8.5h3l1.2-2h8.6l1.2 2h3v7h-3l-1.2 2H7.7l-1.2-2h-3z" />
@@ -157,7 +168,16 @@ export function StepRecording({ onBack, onNext, embedded = false, compact = fals
           </button>
         ) : null}
         {!isRecording ? (
-          <button type="button" style={getButtonStyle("primary")} onClick={start}>
+          <button
+            type="button"
+            style={{
+              ...getButtonStyle("primary"),
+              ...(isRecordHover ? { background: "#8120C7" } : {})
+            }}
+            onClick={start}
+            onMouseEnter={() => setIsRecordHover(true)}
+            onMouseLeave={() => setIsRecordHover(false)}
+          >
             {recording ? "Retake recording" : "Record a video"}
           </button>
         ) : (

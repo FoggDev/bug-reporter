@@ -23,6 +23,7 @@ export function StepScreenshot({ onBack, onNext }: StepScreenshotProps) {
   const annotationRef = useRef<AnnotationCanvasHandle | null>(null);
   const screenshotInputRef = useRef<HTMLInputElement | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isScreenshotHover, setIsScreenshotHover] = useState(false);
   const [isDraggingScreenshot, setIsDraggingScreenshot] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -142,7 +143,17 @@ export function StepScreenshot({ onBack, onNext }: StepScreenshotProps) {
         <button type="button" style={getButtonStyle("secondary")} onClick={onBack}>
           Back
         </button>
-        <button type="button" style={getButtonStyle("primary", { disabled: isCapturing })} onClick={startCapture} disabled={isCapturing}>
+        <button
+          type="button"
+          style={{
+            ...getButtonStyle("primary", { disabled: isCapturing }),
+            ...(isScreenshotHover && !isCapturing ? { background: "#8120C7" } : {})
+          }}
+          onClick={startCapture}
+          onMouseEnter={() => setIsScreenshotHover(true)}
+          onMouseLeave={() => setIsScreenshotHover(false)}
+          disabled={isCapturing}
+        >
           {isCapturing ? "Capturing..." : screenshot ? "Retake screenshot" : "Capture area"}
         </button>
       </div>
