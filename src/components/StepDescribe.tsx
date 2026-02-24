@@ -11,9 +11,11 @@ import { getButtonStyle, inlineStyles } from "../styles/inline";
 type StepDescribeProps = {
   onNext: () => void;
   CustomForm?: CustomFormComponent;
+  describeStepTitle: string;
+  describeStepDescription: string;
 };
 
-export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
+export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeStepDescription }: StepDescribeProps) {
   const {
     config,
     state: { draft, attributes, assets },
@@ -211,8 +213,8 @@ export function StepDescribe({ onNext, CustomForm }: StepDescribeProps) {
 
   return (
     <div style={{ ...inlineStyles.step, display: "flex", flexDirection: "column", minHeight: "100%" }}>
-      <h2 style={inlineStyles.h2}>Report a bug</h2>
-      <p style={inlineStyles.p}>Provide enough context so engineers can reproduce what happened.</p>
+      <h2 style={inlineStyles.h2}>{describeStepTitle}</h2>
+      <p style={inlineStyles.p}>{describeStepDescription}</p>
 
       <label style={inlineStyles.field}>
         Title

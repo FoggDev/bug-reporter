@@ -223,6 +223,8 @@ export function App() {
         CustomForm={SeverityCustomForm}
         themeMode="light"
         buttonColor="#374151"
+        describeStepTitle="Report a bug"
+        describeStepDescription="Provide enough context so engineers can reproduce what happened."
         onSubmit={handleReporterSubmit}
         config={{
           projectId: "sandbox-vite",

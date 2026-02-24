@@ -22,6 +22,8 @@ type BugReporterProps = {
   CustomForm?: CustomFormComponent;
   launcherPosition?: LauncherPosition;
   launcherText?: string;
+  describeStepTitle?: string;
+  describeStepDescription?: string;
   themeMode?: ThemeMode;
   buttonColor?: string;
   reporter?: NonNullable<BugReporterConfig["user"]>;
@@ -32,9 +34,14 @@ type BugReporterShellProps = {
   CustomForm?: CustomFormComponent;
   launcherPosition?: LauncherPosition;
   launcherText?: string;
+  describeStepTitle: string;
+  describeStepDescription: string;
   themeMode: ThemeMode;
   buttonColor: string;
 };
+
+const DEFAULT_DESCRIBE_STEP_TITLE = "Report a bug";
+const DEFAULT_DESCRIBE_STEP_DESCRIPTION = "Provide enough context so engineers can reproduce what happened.";
 
 const DOCK_SIDES: DockSide[] = ["left", "right", "top", "bottom"];
 
@@ -74,7 +81,15 @@ function DockIcon({ side }: { side: DockSide }) {
   );
 }
 
-function BugReporterShell({ CustomForm, launcherPosition, launcherText, themeMode, buttonColor }: BugReporterShellProps) {
+function BugReporterShell({
+  CustomForm,
+  launcherPosition,
+  launcherText,
+  describeStepTitle,
+  describeStepDescription,
+  themeMode,
+  buttonColor
+}: BugReporterShellProps) {
   const { config, state, setDockSide, setStep, close, reset } = useBugReporter();
 
   const nextFromDescribe = () => {
@@ -88,7 +103,7 @@ function BugReporterShell({ CustomForm, launcherPosition, launcherText, themeMod
     close();
   };
 
-  const modalTitle = state.step === "success" ? "Report submitted" : "Report a bug";
+  const modalTitle = state.step === "success" ? "Report submitted" : describeStepTitle;
 
   return (
     <>
@@ -128,7 +143,14 @@ function BugReporterShell({ CustomForm, launcherPosition, launcherText, themeMod
           </button>
         </div>
 
-        {state.step === "describe" ? <StepDescribe onNext={nextFromDescribe} CustomForm={CustomForm} /> : null}
+        {state.step === "describe" ? (
+          <StepDescribe
+            onNext={nextFromDescribe}
+            CustomForm={CustomForm}
+            describeStepTitle={describeStepTitle}
+            describeStepDescription={describeStepDescription}
+          />
+        ) : null}
         {state.step === "review" || state.step === "submitting" ? (
           <StepReview
             onBack={() => {
@@ -158,6 +180,8 @@ export function BugReporter({
   CustomForm,
   launcherPosition,
   launcherText,
+  describeStepTitle = DEFAULT_DESCRIBE_STEP_TITLE,
+  describeStepDescription = DEFAULT_DESCRIBE_STEP_DESCRIPTION,
   themeMode = "dark",
   buttonColor,
   reporter,
@@ -180,6 +204,8 @@ export function BugReporter({
         CustomForm={CustomForm}
         launcherPosition={launcherPosition}
         launcherText={launcherText}
+        describeStepTitle={describeStepTitle}
+        describeStepDescription={describeStepDescription}
         themeMode={themeMode}
         buttonColor={resolvedButtonColor}
       />
