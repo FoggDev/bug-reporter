@@ -58,32 +58,49 @@ function createSubmitError(message: string, cause?: unknown): BugReporterError {
   return new BugReporterError("SUBMIT_ERROR", message, cause);
 }
 
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-      reject(new Error("Failed to read file."));
-    };
-    reader.onerror = () => reject(reader.error ?? new Error("Failed to read file."));
-    reader.readAsDataURL(blob);
-  });
+function ensureSubmitFileMetadata(file: BugReporterSubmitAsset): BugReporterSubmitAsset {
+  const withMeta = file as BugReporterSubmitAsset & {
+    path?: string;
+    relativePath?: string;
+    lastModifiedDate?: Date;
+  };
+
+  if (typeof withMeta.path !== "string") {
+    Object.defineProperty(withMeta, "path", {
+      value: `./${file.name}`,
+      enumerable: true,
+      configurable: true
+    });
+  }
+
+  if (typeof withMeta.relativePath !== "string") {
+    Object.defineProperty(withMeta, "relativePath", {
+      value: `./${file.name}`,
+      enumerable: true,
+      configurable: true
+    });
+  }
+
+  if (!(withMeta.lastModifiedDate instanceof Date)) {
+    Object.defineProperty(withMeta, "lastModifiedDate", {
+      value: new Date(file.lastModified),
+      enumerable: true,
+      configurable: true
+    });
+  }
+
+  return withMeta;
 }
 
-async function buildSubmitAssets(assets: CapturedAsset[]): Promise<BugReporterSubmitAsset[]> {
-  return Promise.all(
-    assets.map(async (asset) => ({
-      id: asset.id,
-      type: asset.type,
-      filename: asset.filename,
-      mimeType: asset.mimeType,
-      size: asset.size,
-      base64: await blobToDataUrl(asset.blob)
-    }))
-  );
+function buildSubmitAssets(assets: CapturedAsset[]): BugReporterSubmitAsset[] {
+  return assets.map((asset) => {
+    const file = new File([asset.blob], asset.filename, {
+      type: asset.mimeType || asset.blob.type || "application/octet-stream",
+      lastModified: Date.now()
+    });
+
+    return ensureSubmitFileMetadata(file as BugReporterSubmitAsset);
+  });
 }
 
 export function BugReporterProvider({ config, onSubmit, children }: BugReporterProviderProps) {
@@ -217,7 +234,7 @@ export function BugReporterProvider({ config, onSubmit, children }: BugReporterP
       if (onSubmit) {
         let submitAssets: BugReporterSubmitAsset[];
         try {
-          submitAssets = await buildSubmitAssets(state.assets);
+          submitAssets = buildSubmitAssets(state.assets);
         } catch (assetTransformError) {
           throw createSubmitError("We couldn't prepare your files for submission. Please try again.", assetTransformError);
         }

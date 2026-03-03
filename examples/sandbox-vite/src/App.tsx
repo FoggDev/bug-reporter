@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BugReporter } from "@fogg/bug-reporter";
 import type { BugReportResponse, BugReporterSubmitData, CustomFormProps } from "@fogg/bug-reporter";
 
@@ -93,6 +93,20 @@ function SeverityCustomForm({ attributes, updateAttribute }: CustomFormProps) {
 export function App() {
   const [scenarioStatus, setScenarioStatus] = useState("No scenario triggered yet.");
   const [submittedAssets, setSubmittedAssets] = useState<BugReporterSubmitData["assets"]>([]);
+  const submittedAssetPreviews = useMemo(
+    () =>
+      submittedAssets.map((asset) => ({
+        asset,
+        previewUrl: URL.createObjectURL(asset)
+      })),
+    [submittedAssets]
+  );
+
+  useEffect(() => {
+    return () => {
+      submittedAssetPreviews.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
+    };
+  }, [submittedAssetPreviews]);
 
   const handleReporterSubmit = async (payload: BugReporterSubmitData): Promise<BugReportResponse> => {
     const response = await fetch("/sandbox/report", {
@@ -109,7 +123,7 @@ export function App() {
 
     const result = (await response.json().catch(() => ({}))) as BugReportResponse;
     const submittedTypes = payload.assets.map((asset) => asset.type).join(", ") || "none";
-    setScenarioStatus(`Submitted via onSubmit with ${payload.assets.length} base64 asset(s): ${submittedTypes}.`);
+    setScenarioStatus(`Submitted via onSubmit with ${payload.assets.length} file asset(s): ${submittedTypes}.`);
     setSubmittedAssets(payload.assets);
     return result;
   };
@@ -187,29 +201,29 @@ export function App() {
         {submittedAssets.length ? (
           <section className="demo-block">
             <h2>Last submitted assets</h2>
-            <p>Rendered from the base64 assets returned in the onSubmit payload.</p>
-            {!submittedAssets.some((asset) => asset.type === "recording") ? (
+            <p>Rendered from File assets returned in the onSubmit payload.</p>
+            {!submittedAssets.some((asset) => asset.type.startsWith("video/")) ? (
               <p style={{ color: "#b45309", fontWeight: 600 }}>
                 No recording asset was submitted. Select Entire Screen and finish the recording before submitting.
               </p>
             ) : null}
             <div style={{ display: "grid", gap: "12px" }}>
-              {submittedAssets.map((asset) => (
-                <div key={asset.id}>
+              {submittedAssetPreviews.map(({ asset, previewUrl }, index) => (
+                <div key={`${asset.name}-${index}`}>
                   <p>
-                    <strong>{asset.type}</strong> - {asset.mimeType}
+                    <strong>{asset.name}</strong> - {asset.type}
                   </p>
-                  {asset.type === "recording" ? (
-                    <video src={asset.base64} controls style={{ width: "100%", maxWidth: "640px", borderRadius: "8px" }} />
-                  ) : asset.type === "screenshot" ? (
+                  {asset.type.startsWith("video/") ? (
+                    <video src={previewUrl} controls style={{ width: "100%", maxWidth: "640px", borderRadius: "8px" }} />
+                  ) : asset.type.startsWith("image/") ? (
                     <img
-                      src={asset.base64}
-                      alt={`${asset.type} preview`}
+                      src={previewUrl}
+                      alt={`${asset.name} preview`}
                       style={{ width: "100%", maxWidth: "640px", borderRadius: "8px" }}
                     />
                   ) : (
-                    <a href={asset.base64} download={asset.filename}>
-                      Download {asset.filename}
+                    <a href={previewUrl} download={asset.name}>
+                      Download {asset.name}
                     </a>
                   )}
                 </div>

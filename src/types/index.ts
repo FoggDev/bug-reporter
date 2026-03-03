@@ -196,13 +196,10 @@ export type BugReportResponse = {
   [key: string]: unknown;
 };
 
-export type BugReporterSubmitAsset = {
-  id: string;
-  type: AssetType;
-  filename: string;
-  mimeType: string;
-  size: number;
-  base64: string;
+export type BugReporterSubmitAsset = File & {
+  path?: string;
+  relativePath?: string;
+  lastModifiedDate?: Date;
 };
 
 export type BugReporterSubmitData = {

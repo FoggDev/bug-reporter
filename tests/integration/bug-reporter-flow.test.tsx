@@ -155,7 +155,7 @@ describe("BugReporter integration", () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it("passes screenshot and recording assets as base64 in onSubmit", async () => {
+  it("passes screenshot and recording assets as files in onSubmit", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn(async (_payload: unknown) => ({ id: "custom-submit-assets" }));
 
@@ -182,13 +182,17 @@ describe("BugReporter integration", () => {
     });
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    const payload = onSubmit.mock.calls[0]?.[0] as { assets: Array<{ type: string; base64: string }> };
+    const payload = onSubmit.mock.calls[0]?.[0] as { assets: File[] };
     expect(payload.assets).toHaveLength(2);
 
-    const screenshotAsset = payload.assets.find((asset: { type: string }) => asset.type === "screenshot");
-    const recordingAsset = payload.assets.find((asset: { type: string }) => asset.type === "recording");
+    const screenshotAsset = payload.assets.find((asset) => asset.type === "image/png");
+    const recordingAsset = payload.assets.find((asset) => asset.type === "video/webm");
 
-    expect(screenshotAsset?.base64).toMatch(/^data:image\/png;base64,/);
-    expect(recordingAsset?.base64).toMatch(/^data:video\/webm;base64,/);
+    expect(screenshotAsset).toBeInstanceOf(File);
+    expect(recordingAsset).toBeInstanceOf(File);
+    expect(screenshotAsset?.name).toBe("screenshot.png");
+    expect(recordingAsset?.name).toBe("recording.webm");
+    expect((screenshotAsset as File & { relativePath?: string })?.relativePath).toBe("./screenshot.png");
+    expect((recordingAsset as File & { relativePath?: string })?.relativePath).toBe("./recording.webm");
   });
 });
