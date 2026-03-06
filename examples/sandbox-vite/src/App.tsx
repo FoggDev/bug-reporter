@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { BugReporter } from "@fogg/bug-reporter";
-import type { BugReportResponse, BugReporterSubmitData, CustomFormProps } from "@fogg/bug-reporter";
+import type { BugReportResponse, BugReporterSubmitData } from "@fogg/bug-reporter";
 
 declare global {
   interface Window {
@@ -69,25 +69,6 @@ if (!window.__bugReporterSandboxFetchMocked) {
     return originalFetch(input, init);
   };
   window.__bugReporterSandboxFetchMocked = true;
-}
-
-function SeverityCustomForm({ attributes, updateAttribute }: CustomFormProps) {
-  const severityLevel = typeof attributes.severityLevel === "string" ? attributes.severityLevel : "";
-
-  return (
-    <label className="br-field">
-      What is the severity level?
-      <select value={severityLevel} onChange={(event) => updateAttribute("severityLevel", event.target.value)}>
-        <option value="" disabled>
-          Select severity level
-        </option>
-        <option value="preventing_release_campaign">Is preventing to release a Campaign</option>
-        <option value="campaign_already_live">My campaign is already live</option>
-        <option value="campaign_live_in_few_hours">The campaign will be live in a few hours</option>
-        <option value="campaign_live_later_today">The campaign will be live later today</option>
-      </select>
-    </label>
-  );
 }
 
 export function App() {
@@ -234,7 +215,6 @@ export function App() {
       </main>
 
       <BugReporter
-        CustomForm={SeverityCustomForm}
         themeMode="light"
         buttonColor="#374151"
         launcherButtonText="Report issue"

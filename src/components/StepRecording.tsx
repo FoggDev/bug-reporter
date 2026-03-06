@@ -11,6 +11,7 @@ type StepRecordingProps = {
   onNext?: () => void;
   embedded?: boolean;
   compact?: boolean;
+  fullWidth?: boolean;
 };
 
 type SharedRecordingState = {
@@ -43,7 +44,7 @@ export function stopSharedRecording(): void {
   sharedRecording?.active.stop();
 }
 
-export function StepRecording({ onBack, onNext, embedded = false, compact = false }: StepRecordingProps) {
+export function StepRecording({ onBack, onNext, embedded = false, compact = false, fullWidth = false }: StepRecordingProps) {
   const {
     config,
     state: { assets },
@@ -181,7 +182,7 @@ export function StepRecording({ onBack, onNext, embedded = false, compact = fals
     );
 
     return (
-      <div style={inlineStyles.captureItem}>
+      <div style={{ ...inlineStyles.captureItem, ...(fullWidth ? { flex: "1 1 100%" } : {}) }}>
         {compactRecordingAction}
         {error ? <p style={{ ...inlineStyles.error, marginTop: "8px" }}>{error}</p> : null}
       </div>

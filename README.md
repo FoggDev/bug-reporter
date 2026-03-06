@@ -29,6 +29,25 @@ export function App() {
 }
 ```
 
+## UI Visibility
+
+Use component props to control the screenshot button and screenshot upload drop zone independently.
+
+```tsx
+<BugReporter
+  config={{
+    features: { screenshot: true, recording: true }
+  }}
+  showScreenshotButton={false}
+  showDragAndDrop={true}
+/>
+```
+
+Defaults:
+
+- `showScreenshotButton`: `false`
+- `showDragAndDrop`: `true`
+
 ## Controlled Submit (No SDK Endpoints)
 
 If you prefer to handle uploads/submission yourself, pass `onSubmit`.  

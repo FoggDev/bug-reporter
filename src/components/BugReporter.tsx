@@ -25,6 +25,8 @@ type BugReporterProps = {
   launcherButtonText?: string;
   describeStepTitle?: string;
   describeStepDescription?: string;
+  showScreenshotButton?: boolean;
+  showDragAndDrop?: boolean;
   themeMode?: ThemeMode;
   buttonColor?: string;
   reporter?: NonNullable<BugReporterConfig["user"]>;
@@ -37,6 +39,8 @@ type BugReporterShellProps = {
   launcherButtonText?: string;
   describeStepTitle: string;
   describeStepDescription: string;
+  showScreenshotButton: boolean;
+  showDragAndDrop: boolean;
   themeMode: ThemeMode;
   buttonColor: string;
 };
@@ -88,6 +92,8 @@ function BugReporterShell({
   launcherButtonText,
   describeStepTitle,
   describeStepDescription,
+  showScreenshotButton,
+  showDragAndDrop,
   themeMode,
   buttonColor
 }: BugReporterShellProps) {
@@ -150,6 +156,8 @@ function BugReporterShell({
             CustomForm={CustomForm}
             describeStepTitle={describeStepTitle}
             describeStepDescription={describeStepDescription}
+            showScreenshotButton={showScreenshotButton}
+            showDragAndDrop={showDragAndDrop}
           />
         ) : null}
         {state.step === "review" || state.step === "submitting" ? (
@@ -184,6 +192,8 @@ export function BugReporter({
   launcherButtonText,
   describeStepTitle = DEFAULT_DESCRIBE_STEP_TITLE,
   describeStepDescription = DEFAULT_DESCRIBE_STEP_DESCRIPTION,
+  showScreenshotButton = false,
+  showDragAndDrop = true,
   themeMode = "dark",
   buttonColor,
   reporter,
@@ -209,6 +219,8 @@ export function BugReporter({
         launcherButtonText={resolvedLauncherButtonText}
         describeStepTitle={describeStepTitle}
         describeStepDescription={describeStepDescription}
+        showScreenshotButton={showScreenshotButton}
+        showDragAndDrop={showDragAndDrop}
         themeMode={themeMode}
         buttonColor={resolvedButtonColor}
       />

@@ -13,9 +13,18 @@ type StepDescribeProps = {
   CustomForm?: CustomFormComponent;
   describeStepTitle: string;
   describeStepDescription: string;
+  showScreenshotButton: boolean;
+  showDragAndDrop: boolean;
 };
 
-export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeStepDescription }: StepDescribeProps) {
+export function StepDescribe({
+  onNext,
+  CustomForm,
+  describeStepTitle,
+  describeStepDescription,
+  showScreenshotButton,
+  showDragAndDrop
+}: StepDescribeProps) {
   const {
     config,
     state: { draft, attributes, assets },
@@ -37,6 +46,15 @@ export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeSt
   const [isDraggingScreenshot, setIsDraggingScreenshot] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const uiMaxVideoSeconds = Math.min(config.storage.limits.maxVideoSeconds, 30);
+  const isScreenshotEnabled = config.features.screenshot;
+  const isRecordingEnabled = config.features.recording;
+  const shouldShowScreenshotButton = isScreenshotEnabled && showScreenshotButton;
+  const shouldShowDragAndDrop = isScreenshotEnabled && showDragAndDrop;
+  const canAddScreenshot = shouldShowScreenshotButton || shouldShowDragAndDrop;
+  const requiresScreenshot = canAddScreenshot && !recording;
+  const shouldShowCaptureSection = shouldShowScreenshotButton || shouldShowDragAndDrop || isRecordingEnabled;
+  const severityLevel = typeof attributes.severityLevel === "string" ? attributes.severityLevel.trim() : "";
+  const hasSeverity = Boolean(severityLevel);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -189,12 +207,17 @@ export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeSt
   const continueToNext = async () => {
     setError(null);
 
-    if (config.features.screenshot && !screenshot) {
-      setError("Capture a screenshot to continue.");
+    if (!hasSeverity) {
+      setError("Select a severity to continue.");
       return;
     }
 
-    if (config.features.screenshot && screenshot && config.features.annotations && annotationRef.current?.hasAnnotations()) {
+    if (requiresScreenshot && !screenshot) {
+      setError("Add a screenshot to continue.");
+      return;
+    }
+
+    if (screenshot && config.features.annotations && annotationRef.current?.hasAnnotations()) {
       const annotatedBlob = await annotationRef.current.exportBlob();
       validateScreenshotSize(annotatedBlob.size, config.storage.limits.maxScreenshotBytes);
       setScreenshot({
@@ -209,7 +232,11 @@ export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeSt
     onNext();
   };
 
-  const canContinue = Boolean(draft.title.trim()) && (!config.features.screenshot || Boolean(screenshot));
+  const canContinue = Boolean(draft.title.trim()) && hasSeverity && (Boolean(recording) || !requiresScreenshot || Boolean(screenshot));
+  const deleteScreenshot = () => {
+    setScreenshot(undefined);
+    setError(null);
+  };
 
   return (
     <div style={{ ...inlineStyles.step, display: "flex", flexDirection: "column", minHeight: "100%" }}>
@@ -238,17 +265,35 @@ export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeSt
         />
       </label>
 
+      <label style={inlineStyles.field}>
+        What is the severity level?
+        <select
+          style={inlineStyles.input}
+          value={severityLevel}
+          onChange={(event) => updateAttribute("severityLevel", event.target.value)}
+          required
+        >
+          <option value="" disabled>
+            Select severity level
+          </option>
+          <option value="preventing_release_campaign">Is preventing to release a Campaign</option>
+          <option value="campaign_already_live">My campaign is already live</option>
+          <option value="campaign_live_in_few_hours">The campaign will be live in a few hours</option>
+          <option value="campaign_live_later_today">The campaign will be live later today</option>
+        </select>
+      </label>
+
       {CustomForm ? (
         <div ref={customFormRef}>
           <CustomForm attributes={attributes} setAttributes={setAttributes} updateAttribute={updateAttribute} />
         </div>
       ) : null}
 
-      {config.features.screenshot || config.features.recording ? (
+      {shouldShowCaptureSection ? (
         <>
           <h3 style={inlineStyles.h3}>Capture</h3>
           <div style={inlineStyles.captureRow}>
-            {config.features.screenshot ? (
+            {shouldShowScreenshotButton ? (
               <div style={inlineStyles.captureItem}>
                 <button
                   type="button"
@@ -271,16 +316,18 @@ export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeSt
                 </button>
               </div>
             ) : null}
-            {config.features.recording ? <StepRecording embedded compact /> : null}
+            {isRecordingEnabled ? <StepRecording embedded compact fullWidth={!shouldShowScreenshotButton} /> : null}
           </div>
           <p style={inlineStyles.captureNote}>
-            {config.features.screenshot && config.features.recording
-              ? `Capture a screenshot and optionally record up to ${uiMaxVideoSeconds} seconds.`
-              : config.features.screenshot
-                ? "Capture the relevant area before continuing."
+            {canAddScreenshot && isRecordingEnabled
+              ? `${shouldShowScreenshotButton ? "Capture" : "Upload"} a screenshot and optionally record up to ${uiMaxVideoSeconds} seconds.`
+              : canAddScreenshot
+                ? shouldShowScreenshotButton
+                  ? "Capture the relevant area before continuing."
+                  : "Upload a screenshot before continuing."
                 : `Record up to ${uiMaxVideoSeconds} seconds.`}
           </p>
-          {config.features.screenshot ? (
+          {shouldShowDragAndDrop ? (
             <>
               <div
                 style={{ ...inlineStyles.dropZone, ...(isDraggingScreenshot ? inlineStyles.dropZoneActive : {}) }}
@@ -312,6 +359,9 @@ export function StepDescribe({ onNext, CustomForm, describeStepTitle, describeSt
               ) : (
                 <img src={screenshot.previewUrl} alt="Screenshot preview" style={inlineStyles.preview} />
               )}
+              <button type="button" style={getButtonStyle("secondary")} onClick={deleteScreenshot}>
+                Delete screenshot
+              </button>
             </div>
           ) : null}
 

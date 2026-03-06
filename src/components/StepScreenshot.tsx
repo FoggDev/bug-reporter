@@ -135,6 +135,11 @@ export function StepScreenshot({ onBack, onNext }: StepScreenshotProps) {
     onNext();
   };
 
+  const deleteScreenshot = () => {
+    setScreenshot(undefined);
+    setError(null);
+  };
+
   return (
     <div style={inlineStyles.step}>
       <h2 style={inlineStyles.h2}>Capture screenshot</h2>
@@ -186,6 +191,9 @@ export function StepScreenshot({ onBack, onNext }: StepScreenshotProps) {
           ) : (
             <img src={screenshot.previewUrl} alt="Screenshot preview" style={inlineStyles.preview} />
           )}
+          <button type="button" style={getButtonStyle("secondary")} onClick={deleteScreenshot}>
+            Delete screenshot
+          </button>
         </div>
       ) : null}
 
